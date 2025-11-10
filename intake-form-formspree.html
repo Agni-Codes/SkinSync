@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Intake form (Formspree) - SkinSync</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Replace {your_site_key} with your Google reCAPTCHA site key if using reCAPTCHA -->
+</head>
+<body>
+  <main>
+    <h1>SkinSync - Intake Form</h1>
+
+    <!-- Formspree intake form: replace {your_form_id} and optional _next URL -->
+    <form id="intake-form" action="https://formspree.io/f/{your_form_id}" method="POST" accept-charset="UTF-8">
+      <!-- Basic contact fields -->
+      <label for="name">Full name *</label>
+      <input id="name" name="name" type="text" required>
+
+      <label for="email">Email *</label>
+      <input id="email" name="email" type="email" required>
+
+      <label for="phone">Phone</label>
+      <input id="phone" name="phone" type="tel">
+
+      <!-- Example checkboxes for skin type (use same 'name' for groups) -->
+      <fieldset>
+        <legend>What is your skin type? (select all that apply)</legend>
+        <label><input type="checkbox" name="skin_type" value="Oily"> Oily</label>
+        <label><input type="checkbox" name="skin_type" value="Dry"> Dry</label>
+        <label><input type="checkbox" name="skin_type" value="Combination"> Combination</label>
+        <label><input type="checkbox" name="skin_type" value="Normal"> Normal</label>
+        <label><input type="checkbox" name="skin_type" value="Sensitive"> Sensitive</label>
+      </fieldset>
+
+      <!-- Example primary concerns -->
+      <fieldset>
+        <legend>Primary skin concerns</legend>
+        <label><input type="checkbox" name="concerns" value="Acne"> Acne</label>
+        <label><input type="checkbox" name="concerns" value="Wrinkles"> Wrinkles</label>
+        <label><input type="checkbox" name="concerns" value="Hyperpigmentation"> Hyperpigmentation</label>
+        <label><input type="checkbox" name="concerns" value="Dryness"> Dryness</label>
+        <label><input type="checkbox" name="concerns" value="Redness"> Redness</label>
+      </fieldset>
+
+      <!-- Example textarea fields -->
+      <label for="current-routine">Current skincare routine</label>
+      <textarea id="current-routine" name="current_routine" rows="4"></textarea>
+
+      <label for="allergies">Known allergies / sensitivities</label>
+      <textarea id="allergies" name="allergies" rows="3"></textarea>
+
+      <!-- Honeypot field (hidden from real users but bots may fill it) -->
+      <div style="display:none">
+        <label>Leave this field empty: <input name="_gotcha" tabindex="-1" autocomplete="off"></label>
+      </div>
+
+      <!-- Formspree helpers: replace _next to a real thank-you URL -->
+      <input type="hidden" name="_subject" value="New SkinSync Intake submission">
+      <input type="hidden" name="_replyto" value="">
+      <input type="hidden" name="_next" value="https://yourdomain.com/thank-you.html">
+
+      <!-- Optional: Google reCAPTCHA v2 widget (site key required). Replace {your_site_key} -->
+      <div class="g-recaptcha" data-sitekey="{your_site_key}"></div>
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <!-- Load reCAPTCHA script (only if you used the widget above) -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('intake-form');
+      form.addEventListener('submit', function (e) {
+        const recaptcha = document.querySelector('textarea[name="g-recaptcha-response"], input[name="g-recaptcha-response"]');
+        if (recaptcha && !recaptcha.value) {
+          e.preventDefault();
+          alert('Please complete the reCAPTCHA to submit the form.');
+        }
+        // Otherwise allow native submit to Formspree
+      });
+    });
+    </script>
+  </main>
+</body>
+</html>
