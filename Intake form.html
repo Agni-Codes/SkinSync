@@ -1321,4 +1321,123 @@ $(function () {
 
 
 
-<div><div class="grecaptcha-badge" data-style="bottomright" style="width: 256px; height: 60px; display: block; transition: right 0.3s; position: fixed; bottom: 14px; right: -186px; box-shadow: gray 0px 0px 5px; border-radius: 2px; overflow: hidden;"><div class="grecaptcha-logo"><iframe title="reCAPTCHA" width="256" height="60" role="presentation" name="a-61dlt9hxj40" frameborder="0" scrolling="no" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation allow-modals allow-popups-to-escape-sandbox allow-storage-access-by-user-activation" src="./Intake form_files/anchor.html"></iframe></div><div class="grecaptcha-error"></div><textarea id="g-recaptcha-response-100000" name="g-recaptcha-response" class="g-recaptcha-response" style="width: 250px; height: 40px; border: 1px solid rgb(193, 193, 193); margin: 10px 25px; padding: 0px; resize: none; display: none;"></textarea></div><iframe style="display: none;" src="./Intake form_files/saved_resource.html"></iframe></div></body></html>
+<div><div class="grecaptcha-badge" data-style="bottomright" style="width: 256px; height: 60px; display: block; transition: right 0.3s; position: fixed; bottom: 14px; right: -186px; box-shadow: gray 0px 0px 5px; border-radius: 2px; overflow: hidden;"><div class="grecaptcha-logo"><iframe title="reCAPTCHA" width="256" height="60" role="presentation" name="a-61dlt9hxj40" frameborder="0" scrolling="no" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation allow-modals allow-popups-to-escape-sandbox allow-storage-access-by-user-activation" src="./Intake form_files/anchor.html"></iframe></div><div class="grecaptcha-error"></div><textarea id="g-recaptcha-response-100000" name="g-recaptcha-response" class="g-recaptcha-response" style="width: 250px; height: 40px; border: 1px solid rgb(193, 193, 193); margin: 10px 25px; padding: 0px; resize: none; display: none;"></textarea></div><iframe style="display: none;" src="./Intake form_files/saved_resource.html"></iframe></div>
+<script type="module">
+  // --- 1. Import Firebase Functions ---
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+  // --- 2. PASTE YOUR FIREBASE CONFIG OBJECT HERE ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyDPZQkWLDIj-YodettAIz6dtWEHuW8ek",
+    authDomain: "skinsync-app-9740d.firebaseapp.com",
+    databaseURL: "https://skinsync-app-9740d-default-rtdb.firebaseio.com",
+    projectId: "skinsync-app-9740d",
+    storageBucket: "skinsync-app-9740d.appspot.com",
+    messagingSenderId: "755718696849",
+    appId: "1:755718696849:web:3e4ae3b5451e7b7913f430",
+  };
+
+  // --- 3. Initialize Firebase ---
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // --- 4. Helper Function to Get All Form Data (handles checkboxes) ---
+  function getFormData(form) {
+    const formData = new FormData(form);
+    const data = {};
+    const keys = new Set();
+    formData.forEach((value, key) => keys.add(key));
+
+    keys.forEach(key => {
+      const allValues = formData.getAll(key);
+      if (allValues.length > 1) {
+        // This is a checkbox group
+        data[key] = allValues;
+      } else {
+        // This is a regular input
+        data[key] = allValues[0];
+      }
+    });
+    
+    // Add a server-side timestamp
+    data.submittedAt = serverTimestamp();
+    return data;
+  }
+
+  // --- 5. Helper Function to Show Success Message ---
+  function showSuccessMessage(formElement, originalButtonText) {
+    // Try to find the built-in error/success div
+    let messageDiv = formElement.nextElementSibling;
+    if (messageDiv && messageDiv.classList.contains('b12-form-error')) {
+      messageDiv.textContent = "Thank you! Your submission has been received.";
+      messageDiv.style.display = 'block';
+      messageDiv.style.color = '#32aa27'; // Use your site's success green
+    } else {
+      // Fallback if the div isn't found
+      alert("Thank you! Your submission has been received.");
+    }
+    formElement.reset(); // Clear the form
+    
+    // Reset the submit button
+    const submitButton = formElement.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+    }
+  }
+
+  // --- 6. Generic Form Submission Handler ---
+  async function handleFormSubmit(event, collectionName) {
+    event.preventDefault(); // Stop the form from submitting
+    
+    const form = event.target;
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.textContent;
+    
+    // Disable button to prevent double-submit
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
+
+    try {
+      // Get the form data
+      const data = getFormData(form);
+      
+      // Save to Firestore
+      const docRef = await addDoc(collection(db, collectionName), data);
+      console.log("Document written to " + collectionName + " with ID: ", docRef.id);
+      
+      // Show success
+      showSuccessMessage(form, originalButtonText);
+
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      alert("There was an error submitting your form. Please try again.");
+      // Re-enable button on error
+      submitButton.disabled = false;
+      submitButton.textContent = originalButtonText;
+    }
+  }
+
+  // --- 7. Attach Listeners to Forms ---
+  
+  // Intake Form
+  const intakeForm = document.getElementById("UL_FORM_2db237b6-bd26-4114-a1bf-fb297b6b9750");
+  if (intakeForm) {
+    intakeForm.addEventListener("submit", (e) => handleFormSubmit(e, "intakeSubmissions"));
+  }
+
+  // Meeting Request Form
+  const meetingForm = document.getElementById("UL_FORM_cfc8f53c-2237-4e1b-9981-21843483da2c");
+  if (meetingForm) {
+    meetingForm.addEventListener("submit", (e) => handleFormSubmit(e, "meetingRequests"));
+  }
+
+  // Contact Form (from index.html)
+  const contactForm = document.getElementById("UL_FORM_720b080b-22fa-483d-a51c-0e78c8e14b2d");
+  if (contactForm) {
+    contactForm.addEventListener("submit", (e) => handleFormSubmit(e, "contactSubmissions"));
+  }
+
+</script>
+</body></html>
